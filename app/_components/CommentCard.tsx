@@ -1,4 +1,6 @@
-export function CommentCard({ comment, onDelete }: { comment: Comment; onDelete: () => void }) {
+import { BlogComment } from "../_types/types";
+
+export function CommentCard({ comment, onDelete }: { comment: BlogComment; onDelete: () => void }) {
   const date = new Date(comment.createdAt).toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
   });

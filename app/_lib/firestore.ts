@@ -4,7 +4,7 @@ import {
   serverTimestamp, Timestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { CreateCommentInput, CreatePostInput, Post, UpdatePostInput } from "../_types/types";
+import { BlogComment, CreateCommentInput, CreatePostInput, Post, UpdatePostInput } from "../_types/types";
 
 
 function toISO(value: unknown): string {
@@ -28,7 +28,7 @@ function docToPost(id: string, data: Record<string, any>): Post {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function docToComment(id: string, data: Record<string, any>): Comment {
+function docToComment(id: string, data: Record<string, any>): BlogComment {
   return {
     id,
     postId: data.postId ?? "",
@@ -73,14 +73,14 @@ export async function deletePost(id: string): Promise<void> {
   await deleteDoc(doc(postsCol, id));
 }
 
-export async function fetchComments(postId: string): Promise<Comment[]> {
+export async function fetchComments(postId: string): Promise<BlogComment[]> {
   const commentsCol = collection(db, "posts", postId, "comments");
   const q = query(commentsCol, orderBy("createdAt", "asc"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => docToComment(d.id, d.data()));
 }
 
-export async function createComment(input: CreateCommentInput): Promise<Comment> {
+export async function createComment(input: CreateCommentInput): Promise<BlogComment> {
   const commentsCol = collection(db, "posts", input.postId, "comments");
   const ref = await addDoc(commentsCol, {
     ...input,

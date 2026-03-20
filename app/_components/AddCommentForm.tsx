@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { CommentFormValues, commentSchema } from "../_lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { BlogComment } from "../_types/types";
 
 export function AddCommentForm({
   postId,
   onCreate,
 }: {
   postId: string;
-  onCreate: (input: { postId: string; author: string; content: string }) => Promise<Comment>;
+  onCreate: (input: { postId: string; author: string; content: string }) => Promise<BlogComment>;
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CommentFormValues>({

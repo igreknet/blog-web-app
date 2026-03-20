@@ -9,7 +9,7 @@ export interface Post {
   updatedAt: string;
 }
 
-export interface Comment {
+export interface BlogComment {
   id: string;
   postId: string;
   author: string;
@@ -19,4 +19,4 @@ export interface Comment {
 
 export type CreatePostInput = Omit<Post, "id" | "createdAt" | "updatedAt">;
 export type UpdatePostInput = Partial<CreatePostInput>;
-export type CreateCommentInput = Omit<Comment, "id" | "createdAt">;
+export type CreateCommentInput = Omit<BlogComment, "id" | "createdAt">;
