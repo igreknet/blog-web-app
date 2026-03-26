@@ -1,9 +1,12 @@
 import { create } from "zustand";
+import { BlogStore } from "../_types/types";
 
-interface BlogStore {
-  _version: number;
-}
 
-export const useBlogStore = create<BlogStore>(() => ({
-  _version: 1,
+export const useBlogStore = create<BlogStore>((set) => ({
+  posts: [],
+  setPosts: (posts) => set({ posts }),
+  removePost: (id) =>
+    set((state) => ({ posts: state.posts.filter((p) => p.id !== id) })),
+  deletingId: null,
+  setDeletingId: (id) => set({ deletingId: id }),
 }));

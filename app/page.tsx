@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { usePosts } from "./_hooks/useBlog";
+import { useBlogStore } from "./_store/store";
 import { PostList } from "./_components/PostList";
 
 export default function HomePage() {
-  const { data: posts, isLoading, error } = usePosts();
+  const { isLoading, error } = usePosts();
+  const posts = useBlogStore((s) => s.posts);
 
   return (
     <div className="space-y-6">
@@ -13,7 +14,9 @@ export default function HomePage() {
         <div>
           <h1>Blog Posts</h1>
           <p className="text-gray-500 mt-1 text-sm">
-            {posts ? `${posts.length} post${posts.length !== 1 ? "s" : ""}` : "\u00a0"}
+            {!isLoading
+              ? `${posts.length} post${posts.length !== 1 ? "s" : ""}`
+              : "\u00a0"}
           </p>
         </div>
       </div>
@@ -24,7 +27,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {isLoading ? <PostListSkeleton /> : <PostList posts={posts ?? []} />}
+      {isLoading ? <PostListSkeleton /> : <PostList posts={posts} />}
     </div>
   );
 }

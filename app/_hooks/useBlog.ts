@@ -1,15 +1,23 @@
 import useSWR, { mutate } from "swr";
-import { createComment, createPost, deleteComment, deletePost, fetchComments, fetchPost, fetchPosts, updatePost } from "../_lib/firestore";
-import { CreateCommentInput, CreatePostInput, UpdatePostInput } from "../_types/types";
-
-
+import {
+  fetchPosts, fetchPost, fetchComments,
+  createPost, updatePost, deletePost,
+  createComment, deleteComment,
+} from "../_lib/firestore";
+import { useBlogStore } from "../_store/store";
+import type { CreatePostInput, UpdatePostInput, CreateCommentInput } from "../_types/types";
 
 export const POSTS_KEY = "posts";
 export const postKey = (id: string) => ["post", id] as const;
 export const commentsKey = (postId: string) => ["comments", postId] as const;
 
 export function usePosts() {
-  return useSWR(POSTS_KEY, fetchPosts, { revalidateOnFocus: false });
+  const { setPosts } = useBlogStore();
+
+  return useSWR(POSTS_KEY, fetchPosts, {
+    revalidateOnFocus: false,
+    onSuccess: (data) => setPosts(data),
+  });
 }
 
 export function usePost(id: string) {
@@ -17,10 +25,13 @@ export function usePost(id: string) {
 }
 
 export function useComments(postId: string) {
-  return useSWR(commentsKey(postId), () => fetchComments(postId), { revalidateOnFocus: false });
+  return useSWR(commentsKey(postId), () => fetchComments(postId), {
+    revalidateOnFocus: false,
+  });
 }
 
 export function usePostMutations() {
+  const { removePost, setDeletingId } = useBlogStore();
   const create = async (input: CreatePostInput) => {
     const post = await createPost(input);
     await mutate(POSTS_KEY);
@@ -34,8 +45,14 @@ export function usePostMutations() {
   };
 
   const remove = async (id: string) => {
-    await deletePost(id);
-    await mutate(POSTS_KEY);
+    setDeletingId(id);
+    removePost(id);
+    try {
+      await deletePost(id);
+      await mutate(POSTS_KEY);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return { create, update, remove };

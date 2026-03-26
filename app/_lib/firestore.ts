@@ -1,11 +1,13 @@
 import {
   collection, doc, getDocs, getDoc, addDoc,
   updateDoc, deleteDoc, query, orderBy,
-  serverTimestamp, Timestamp,
+  serverTimestamp, Timestamp, writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { BlogComment, CreateCommentInput, CreatePostInput, Post, UpdatePostInput } from "../_types/types";
-
+import type {
+  Post, BlogComment, CreatePostInput,
+  UpdatePostInput, CreateCommentInput,
+} from "../_types/types";
 
 function toISO(value: unknown): string {
   if (value instanceof Timestamp) return value.toDate().toISOString();
@@ -70,7 +72,18 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<vo
 }
 
 export async function deletePost(id: string): Promise<void> {
-  await deleteDoc(doc(postsCol, id));
+  const commentsCol = collection(db, "posts", id, "comments");
+  const commentsSnap = await getDocs(commentsCol);
+
+  const batch = writeBatch(db);
+
+  commentsSnap.docs.forEach((commentDoc) => {
+    batch.delete(commentDoc.ref);
+  });
+
+  batch.delete(doc(postsCol, id));
+
+  await batch.commit();
 }
 
 export async function fetchComments(postId: string): Promise<BlogComment[]> {
