@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Link from "next/link";
 import { use } from "react";
 import { usePost, usePostMutations } from "@/app/_hooks/useBlog";
@@ -39,16 +39,22 @@ export default function PostPage({ params }: Props) {
     );
   }
 
-  if (error || !post) {
+  if (error) {
     return (
       <div className="card border-red-200 bg-red-50 text-red-700 space-y-4">
-        <p>Post not found or failed to load.</p>
+        <p>Failed to load post. Please try again.</p>
         <Link href="/" className="btn-secondary inline-flex">
           ← Back to posts
         </Link>
       </div>
     );
   }
+
+  if (!isLoading && !post) {
+    notFound();
+  }
+
+  if (!post) return null;
 
   const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
     year: "numeric", month: "long", day: "numeric",
